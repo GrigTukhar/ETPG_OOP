@@ -1,7 +1,7 @@
 import json
 
 days = ("day1", "day2", "day3", "day4", "day5", "day6", "day7")
-time_of_day =("morning", "lunch", "day", "evening")
+times =("morning", "lunch", "day", "evening", "exit")
 
 class exercise:
 
@@ -26,6 +26,9 @@ class athlete(exercise):
         self.gender = gender
         self.workout = workout
         self.feedback = feedback
+        self.count = 0
+        for key in self.feedback:
+            self.count = self.count+1
 
     @staticmethod
     def getInfo():
@@ -101,9 +104,38 @@ class athlete(exercise):
                             print("\nNo workouts for this day, cannot add feedback")
 
     def createFeedback(self):
-        print("code works")
-
-
+        time_answer="x"
+        while time_answer not in times or time_answer != exit:
+            time_answer = input(
+                "\nChoose one of the following options for " + self.day + " in " + self.week + " (" + (", ").join(
+                    times) + "): ")
+            if time_answer not in times:
+                print("That does not exist, try again")
+            elif time_answer == "exit":
+                return 0
+            else:
+                if self.workout[self.week][self.day][time_answer] == -1:
+                    print("No workout for this time of day, cannot provide feedback")
+                else:
+                    ifDone = "x"
+                    while (ifDone != "yes" and ifDone != "no"):
+                        ifDone = str(input("Have you completed the workout? yes/no: "))
+                        if (ifDone != "yes" and ifDone != "no"):
+                            print("Invalid input, try again")
+                    text_feedback = input(
+                        "Input feedback (if you did the workout how you felt, if not why): ")
+                    self.count=self.count+1
+                    self.feedback[self.count]={self.week:{self.day:{time_answer:{},"hasCompleted":{},"feedback":{}}}}
+                    self.feedback[self.count][self.week][self.day][time_answer]=self.workout[self.week][self.day][time_answer]
+                    self.feedback[self.count][self.week][self.day]["hasCompleted"] = ifDone
+                    self.feedback[self.count][self.week][self.day]["feedback"] = text_feedback
+                    self.feedback[self.count][self.week][self.day]["resolved"] ="no"
+                    print("\nFeedback added for", time_answer, "during", self.day, "in", self.week)
+                    data = exercise.loadData(athlete.file)
+                    data["ID"][self.ID]["feedback"] = self.feedback
+                    file = open("main.json", "w")
+                    file.write(json.dumps(data))
+                    file.close()
 
 def main():
     x = True
@@ -125,7 +157,6 @@ def main():
                 athlete.createFeedback(person_object)
         else:
             x = False
-
 
 
 main()
