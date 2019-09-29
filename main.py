@@ -11,7 +11,7 @@ replies_workout = ("edit", "remove", "exit")
 sports = {"swimming", "cycling", "running"}
 
 
-class exercise:
+class Placeholder:
 
     def __init__(self):
         pass
@@ -29,11 +29,10 @@ class exercise:
         file.close()
 
 
-class athlete(exercise):
+class Athlete():
     file = "main.json"
 
     def __init__(self, ID, name, surname, age, gender, workout, feedback):
-        super().loadData(athlete.file)
         self.ID = ID
         self.name = name
         self.surname = surname
@@ -47,7 +46,7 @@ class athlete(exercise):
 
     @staticmethod
     def getInfo():
-        users = exercise.loadData(athlete.file)
+        users = Placeholder.loadData(Athlete.file)
         userids = []
         for key in users["ID"]:
             userids.append(key)
@@ -152,13 +151,13 @@ class athlete(exercise):
                     self.feedback[self.count][self.week][self.day]["feedback"] = text_feedback
                     self.feedback[self.count][self.week][self.day]["resolved"] = "no"
                     print("\nFeedback added for", time_answer, "during", self.day, "in", self.week)
-                    data = exercise.loadData(athlete.file)
+                    data = Placeholder.loadData(Athlete.file)
                     data["ID"][self.ID]["feedback"] = self.feedback
-                    exercise.uploadData(data)
+                    Placeholder.uploadData(data)
 
     @classmethod
     def createAthlete(cls):
-        data = exercise.loadData(athlete.file)
+        data = Placeholder.loadData(Athlete.file)
         while True:
             answer = input("\nAthlete Profile Creation | Choose an option for users? (create, delete, exit): ")
             if answer == "create":
@@ -186,7 +185,7 @@ class athlete(exercise):
                                                    "day6": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
                                                    "day7": {"morning": -1, "lunch": -1, "day": -1, "evening": -1}}
                 print("\nAthlete",ID,"(",name,surname,") who is a",age,"year old",gender,"has been created")
-                exercise.uploadData(data)
+                Placeholder.uploadData(data)
             elif answer =="delete":
                 b = True
                 while b == True:
@@ -197,22 +196,21 @@ class athlete(exercise):
                         break
                     else:
                         del data["ID"][temp]
-                        exercise.uploadData(data)
+                        Placeholder.uploadData(data)
             elif answer == "exit":
                 break
             else:
                 print("Invalid input, please try again")
 
-class coach(exercise):
+class Coach():
     file = "main.json"
 
     def __init__(self, ID):
-        super().loadData(coach.file)
         self.ID = ID
 
     @staticmethod
     def getInfo(placeholder):
-        users = exercise.loadData(coach.file)
+        users = Placeholder.loadData(Coach.file)
         userids = []
         for key in users["ID"]:
             userids.append(key)
@@ -246,7 +244,7 @@ class coach(exercise):
                 print("No such username, please try again")
 
     def coachWeek(self):
-        placeholder = exercise.loadData(coach.file)
+        placeholder = Placeholder.loadData(Coach.file)
         data = placeholder["ID"][self.ID]
         reply = "x"
         print("\nCurrent weeks in schedule :(" + (", ").join(data["workout"].keys()) + ")")
@@ -274,10 +272,10 @@ class coach(exercise):
                 print("\nweek" + count, "has been removed\n")
                 del data["workout"]["week" + count]
             placeholder["ID"][self.ID]=data
-            exercise.uploadData(placeholder)
+            Placeholder.uploadData(placeholder)
 
     def coachWorkout(self):
-        placeholder = exercise.loadData(coach.file)
+        placeholder = Placeholder.loadData(Coach.file)
         data = placeholder["ID"][self.ID]
         week = "x"
         while week not in data["workout"].keys():
@@ -364,10 +362,10 @@ class coach(exercise):
                         data["workout"][week][day][time] = {"type": sport, "minutes": minutes,"distance": distance, "load": load}
                         print("Workout created during", time, "on", day, "in", week, ":",data["workout"][week][day][time]["type"], "for",data["workout"][week][day][time]["minutes"], "minutes and",data["workout"][week][day][time]["distance"], "kilometers, at a",data["workout"][week][day][time]["load"], "load")
                     placeholder["ID"][self.ID] = data
-                    exercise.uploadData(placeholder)
+                    Placeholder.uploadData(placeholder)
 
     def coachFeedback(self):
-        placeholder = exercise.loadData(coach.file)
+        placeholder = Placeholder.loadData(Coach.file)
         feedback_data = placeholder["ID"][self.ID]["feedback"]
         numbers = []
         print("\nFeedback Menu | Following data sent by athlete\n")
@@ -430,7 +428,7 @@ class coach(exercise):
                       minutes, "minutes and", distance, "kilometers on a", load, "load, has been resolved")
                 numbers.remove(number)
                 placeholder["ID"][self.ID]["feedback"] = feedback_data
-                exercise.uploadData(placeholder)
+                Placeholder.uploadData(placeholder)
 
 def main():
     choice = "x"
@@ -446,7 +444,7 @@ def main():
                 if answer =="check":
                     x = True
                     while x == True:
-                        info = athlete.getInfo()
+                        info = Athlete.getInfo()
                         if info != 0:
                             for key in info:
                                 ID = key
@@ -457,14 +455,14 @@ def main():
                             gender = holder["gender"]
                             workout = holder["workout"]
                             feedback = holder["feedback"]
-                            person_object = athlete(ID, name, surname, age, gender, workout, feedback)
-                            feedback_answer = athlete.getWorkout(person_object)
+                            person_object = Athlete(ID, name, surname, age, gender, workout, feedback)
+                            feedback_answer = Athlete.getWorkout(person_object)
                             if feedback_answer == 1:
-                                athlete.createFeedback(person_object)
+                                Athlete.createFeedback(person_object)
                         else:
                             x = False
                 elif answer =="creation":
-                    athlete.createAthlete()
+                    Athlete.createAthlete()
                 elif answer =="exit":
                     y = False
                 else:
@@ -477,28 +475,28 @@ def main():
                 if answer == "week":
                     y = True
                     while y == True:
-                        info = coach.getInfo(answer)
+                        info = Coach.getInfo(answer)
                         if info != 0:
-                            coach_object = coach(info)
-                            coach.coachWeek(coach_object)
+                            coach_object = Coach(info)
+                            Coach.coachWeek(coach_object)
                         else:
                             y = False
                 elif answer == "workout":
                     y = True
                     while y == True:
-                        info = coach.getInfo(answer)
+                        info = Coach.getInfo(answer)
                         if info != 0:
-                            coach_object = coach(info)
-                            coach.coachWorkout(coach_object)
+                            coach_object = Coach(info)
+                            Coach.coachWorkout(coach_object)
                         else:
                             y = False
                 elif answer == "feedback":
                     y = True
                     while y == True:
-                        info = coach.getInfo(answer)
+                        info = Coach.getInfo(answer)
                         if info != 0:
-                            coach_object = coach(info)
-                            coach.coachFeedback(coach_object)
+                            coach_object = Coach(info)
+                            Coach.coachFeedback(coach_object)
                         else:
                             y = False
                 elif answer == "exit":
