@@ -3,7 +3,7 @@
     "GrigT": {
       "name": "Grigor",
       "surname": "Tukharyan",
-      "age": 19,
+      "birthdate": "19/09/2000",
       "gender": "male",
       "workout": {
         "week1": {
@@ -166,7 +166,7 @@
     "Gor_001": {
       "name": "Gor",
       "surname": "Isoyan",
-      "age": 20,
+      "birthdate": "20",
       "gender": "male",
       "workout": {
         "week1": {

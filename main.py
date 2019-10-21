@@ -10,8 +10,7 @@ loads = ("easy", "medium", "hard")
 replies_workout = ("edit", "remove", "exit")
 sports = {"swimming", "cycling", "running"}
 
-
-class Placeholder:
+class JsonManager:
 
     def __init__(self):
         pass
@@ -23,7 +22,7 @@ class Placeholder:
         return cls.data
 
     @classmethod
-    def uploadData(clsc,data):
+    def uploadData(clsc, data):
         file = open("main.json", "w")
         file.write(json.dumps(data))
         file.close()
@@ -32,11 +31,11 @@ class Placeholder:
 class Athlete():
     file = "main.json"
 
-    def __init__(self, ID, name, surname, age, gender, workout, feedback):
+    def __init__(self, ID, name, surname, birthdate, gender, workout, feedback):
         self.ID = ID
         self.name = name
         self.surname = surname
-        self.age = age
+        self.birthdate = birthdate
         self.gender = gender
         self.workout = workout
         self.feedback = feedback
@@ -45,8 +44,8 @@ class Athlete():
             self.count = self.count + 1
 
     @staticmethod
-    def getInfo():
-        users = Placeholder.loadData(Athlete.file)
+    def loadAllFromJSON():
+        users = JsonManager.loadData(Athlete.file)
         userids = []
         for key in users["ID"]:
             userids.append(key)
@@ -54,22 +53,23 @@ class Athlete():
             athleteID = input(
                 "\nList of Athletes |Choose a username to check info (" + (", ").join(userids) + ", or exit): ")
             if athleteID in users["ID"]:
+
                 person = users["ID"][athleteID]
                 name = person["name"]
                 surname = person["surname"]
-                age = person["age"]
+                birthdate = person["birthdate"]
                 gender = person["gender"]
                 workout = person["workout"]
                 feedback = person["feedback"]
-                print("\nProfile of", athleteID, "\n-------------------------""\nName:", name, surname, "\nAge:", age,
+                person_object = Athlete(athleteID, name, surname, birthdate, gender, workout, feedback)
+
+                print("\nProfile of", athleteID, "\n-------------------------""\nName:", name, surname, "\nAge:", birthdate,
                       "\nGender:", gender)
                 x = True
                 while x == True:
                     answer = input("\nWould you like to check workouts (yes, no): ")
                     if answer == "yes":
-                        data = {athleteID: {}}
-                        data[athleteID] = users["ID"][athleteID]
-                        return data
+                        return person_object
                     elif answer == "no":
                         x = False
                     else:
@@ -151,20 +151,20 @@ class Athlete():
                     self.feedback[self.count][self.week][self.day]["feedback"] = text_feedback
                     self.feedback[self.count][self.week][self.day]["resolved"] = "no"
                     print("\nFeedback added for", time_answer, "during", self.day, "in", self.week)
-                    data = Placeholder.loadData(Athlete.file)
+                    data = JsonManager.loadData(Athlete.file)
                     data["ID"][self.ID]["feedback"] = self.feedback
-                    Placeholder.uploadData(data)
+                    JsonManager.uploadData(data)
 
     @classmethod
     def createAthlete(cls):
-        data = Placeholder.loadData(Athlete.file)
+        data = JsonManager.loadData(Athlete.file)
         while True:
             answer = input("\nAthlete Profile Creation | Choose an option for users? (create, delete, exit): ")
             if answer == "create":
                 ID=input("\nInput a username: ")
                 name = input("Input your first name: ")
                 surname = input("Input your surname: ")
-                age = input("Input your age: ")
+                birthdate = input("Input your birthdate: ")
                 z = True
                 while z == True:
                     gender = input("Input your gender (male, female): ")
@@ -172,10 +172,10 @@ class Athlete():
                         print("Invalid input, please use either male or female")
                     else:
                         z = False
-                data["ID"][ID]={"name":name, "surname": surname, "age": age, "workout": {"week1":{}},"feedback":{}}
+                data["ID"][ID]={"name":name, "surname": surname, "birthdate": birthdate, "workout": {"week1":{}},"feedback":{}}
                 data["ID"][ID]["name"]=name
                 data["ID"][ID]["surname"]=surname
-                data["ID"][ID]["age"]=age
+                data["ID"][ID]["birthdate"]=birthdate
                 data["ID"][ID]["gender"]=gender
                 data["ID"][ID]["workout"]["week1"] = {"day1": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
                                                    "day2": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
@@ -184,8 +184,8 @@ class Athlete():
                                                    "day5": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
                                                    "day6": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
                                                    "day7": {"morning": -1, "lunch": -1, "day": -1, "evening": -1}}
-                print("\nAthlete",ID,"(",name,surname,") who is a",age,"year old",gender,"has been created")
-                Placeholder.uploadData(data)
+                print("\nAthlete",ID,"(",name,surname,") who is a",birthdate,"year old",gender,"has been created")
+                JsonManager.uploadData(data)
             elif answer =="delete":
                 b = True
                 while b == True:
@@ -196,7 +196,7 @@ class Athlete():
                         break
                     else:
                         del data["ID"][temp]
-                        Placeholder.uploadData(data)
+                        JsonManager.uploadData(data)
             elif answer == "exit":
                 break
             else:
@@ -210,7 +210,7 @@ class Coach():
 
     @staticmethod
     def getInfo(placeholder):
-        users = Placeholder.loadData(Coach.file)
+        users = JsonManager.loadData(Coach.file)
         userids = []
         for key in users["ID"]:
             userids.append(key)
@@ -222,12 +222,12 @@ class Coach():
                 person = users["ID"][athleteID]
                 name = person["name"]
                 surname = person["surname"]
-                age = person["age"]
+                birthdate = person["birthdate"]
                 gender = person["gender"]
                 workout = person["workout"]
                 feedback = person["feedback"]
                 print("\nProfile of", athleteID, "\n-------------------------""\nName:", name, surname, "\nAge:",
-                      age, "\nGender:", gender)
+                      birthdate, "\nGender:", gender)
                 x = True
                 while x == True:
                     answer = input("\nWould you like to edit (yes, no): ")
@@ -244,7 +244,7 @@ class Coach():
                 print("No such username, please try again")
 
     def coachWeek(self):
-        placeholder = Placeholder.loadData(Coach.file)
+        placeholder = JsonManager.loadData(Coach.file)
         data = placeholder["ID"][self.ID]
         reply = "x"
         print("\nCurrent weeks in schedule :(" + (", ").join(data["workout"].keys()) + ")")
@@ -272,10 +272,10 @@ class Coach():
                 print("\nweek" + count, "has been removed\n")
                 del data["workout"]["week" + count]
             placeholder["ID"][self.ID]=data
-            Placeholder.uploadData(placeholder)
+            JsonManager.uploadData(placeholder)
 
     def coachWorkout(self):
-        placeholder = Placeholder.loadData(Coach.file)
+        placeholder = JsonManager.loadData(Coach.file)
         data = placeholder["ID"][self.ID]
         week = "x"
         while week not in data["workout"].keys():
@@ -362,10 +362,10 @@ class Coach():
                         data["workout"][week][day][time] = {"type": sport, "minutes": minutes,"distance": distance, "load": load}
                         print("Workout created during", time, "on", day, "in", week, ":",data["workout"][week][day][time]["type"], "for",data["workout"][week][day][time]["minutes"], "minutes and",data["workout"][week][day][time]["distance"], "kilometers, at a",data["workout"][week][day][time]["load"], "load")
                     placeholder["ID"][self.ID] = data
-                    Placeholder.uploadData(placeholder)
+                    JsonManager.uploadData(placeholder)
 
     def coachFeedback(self):
-        placeholder = Placeholder.loadData(Coach.file)
+        placeholder = JsonManager.loadData(Coach.file)
         feedback_data = placeholder["ID"][self.ID]["feedback"]
         numbers = []
         print("\nFeedback Menu | Following data sent by athlete\n")
@@ -428,7 +428,7 @@ class Coach():
                       minutes, "minutes and", distance, "kilometers on a", load, "load, has been resolved")
                 numbers.remove(number)
                 placeholder["ID"][self.ID]["feedback"] = feedback_data
-                Placeholder.uploadData(placeholder)
+                JsonManager.uploadData(placeholder)
 
 def main():
     choice = "x"
@@ -444,18 +444,8 @@ def main():
                 if answer =="check":
                     x = True
                     while x == True:
-                        info = Athlete.getInfo()
-                        if info != 0:
-                            for key in info:
-                                ID = key
-                            holder = info[ID]
-                            name = holder["name"]
-                            surname = holder["surname"]
-                            age = holder["age"]
-                            gender = holder["gender"]
-                            workout = holder["workout"]
-                            feedback = holder["feedback"]
-                            person_object = Athlete(ID, name, surname, age, gender, workout, feedback)
+                        person_object = Athlete.loadAllFromJSON()
+                        if person_object != 0:
                             feedback_answer = Athlete.getWorkout(person_object)
                             if feedback_answer == 1:
                                 Athlete.createFeedback(person_object)
