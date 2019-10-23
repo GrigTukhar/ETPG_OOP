@@ -209,7 +209,7 @@ class Coach():
         self.ID = ID
 
     @staticmethod
-    def getInfo(placeholder):
+    def loadAllFromJSON(placeholder):
         users = JsonManager.loadData(Coach.file)
         userids = []
         for key in users["ID"]:
@@ -232,7 +232,8 @@ class Coach():
                 while x == True:
                     answer = input("\nWould you like to edit (yes, no): ")
                     if answer == "yes":
-                        return athleteID
+                        coach_object = Coach(athleteID)
+                        return coach_object
                     elif answer == "no":
                         x = False
                     else:
@@ -465,27 +466,24 @@ def main():
                 if answer == "week":
                     y = True
                     while y == True:
-                        info = Coach.getInfo(answer)
-                        if info != 0:
-                            coach_object = Coach(info)
+                        coach_object = Coach.loadAllFromJSON(answer)
+                        if coach_object != 0:
                             Coach.coachWeek(coach_object)
                         else:
                             y = False
                 elif answer == "workout":
                     y = True
                     while y == True:
-                        info = Coach.getInfo(answer)
-                        if info != 0:
-                            coach_object = Coach(info)
+                        coach_object = Coach.loadAllFromJSON(answer)
+                        if coach_object != 0:
                             Coach.coachWorkout(coach_object)
                         else:
                             y = False
                 elif answer == "feedback":
                     y = True
                     while y == True:
-                        info = Coach.getInfo(answer)
-                        if info != 0:
-                            coach_object = Coach(info)
+                        coach_object = Coach.loadAllFromJSON(answer)
+                        if coach_object != 0:
                             Coach.coachFeedback(coach_object)
                         else:
                             y = False
