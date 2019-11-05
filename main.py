@@ -17,13 +17,13 @@ class AthleteManager:
                 self.athletes.append(athlete)
 
     def saveAthletesDataToJSON(self):
-        json = {}
-        json["ID"] = {}
+        json_all = {}
+        json_all["ID"] = {}
         for athlete in self.athletes:
-            json["ID"][athlete.ID] = athlete.getJSON()
+            json_all["ID"][athlete.ID] = athlete.getJSON()
 
         file = open("main.json", "w")
-        file.write(json.dumps(json))
+        file.write(json.dumps(json_all))
         file.close()
 
     def getAthlete(self, ID):
@@ -53,6 +53,9 @@ class Athlete:
         self.gender = data["gender"]
         self.workout = data["workout"]
         self.feedback = data["feedback"]
+        self.count = 0
+        for key in self.feedback:
+            self.count +=1
 
     def getJSON(self):
         json = {}
@@ -75,9 +78,7 @@ class Athlete:
             if answer == "yes":
                 feedback_answer = self.getWorkout()
                 if feedback_answer == 1:
-                    pass
-                    #self.createFeedback()
-                #ToDo: callanother method
+                    self.createFeedback()
             elif answer == "no":
                 x = False
             else:
@@ -125,6 +126,38 @@ class Athlete:
                         else:
                             print("\nNo workouts for this day, cannot add feedback")
 
+    def createFeedback(self):
+        time_answer = "x"
+        while time_answer not in times or time_answer != exit:
+            time_answer = input(
+                "\nChoose one of the following options for " + self.day + " in " + self.week + " (" + (", ").join(
+                    times) + "): ")
+            if time_answer not in times:
+                print("That does not exist, try again")
+            elif time_answer == "exit":
+                return 0
+            else:
+                if self.workout[self.week][self.day][time_answer] == -1:
+                    print("No workout for this time of day, cannot provide feedback")
+                else:
+                    ifDone = "x"
+                    while (ifDone != "yes" and ifDone != "no"):
+                        ifDone = str(input("Have you completed the workout? yes/no: "))
+                        if (ifDone != "yes" and ifDone != "no"):
+                            print("Invalid input, try again")
+                    text_feedback = input(
+                        "Input feedback (if you did the workout how you felt, if not why): ")
+                    self.count = self.count + 1
+                    self.feedback[self.count] = {
+                        self.week: {self.day: {time_answer: {}, "hasCompleted": {}, "feedback": {}}}}
+                    self.feedback[self.count][self.week][self.day][time_answer] = self.workout[self.week][self.day][
+                        time_answer]
+                    self.feedback[self.count][self.week][self.day]["hasCompleted"] = ifDone
+                    self.feedback[self.count][self.week][self.day]["feedback"] = text_feedback
+                    self.feedback[self.count][self.week][self.day]["resolved"] = "no"
+                    print("\nFeedback added for", time_answer, "during", self.day, "in", self.week)
+
+
 
 def main():
     athleteManager = AthleteManager()
@@ -149,6 +182,7 @@ def main():
                         if athlete != None:
                             athlete.printProfile()
                             athlete.checkProfile()
+                            athleteManager.saveAthletesDataToJSON()
                         else:
                             x = False
                 elif answer =="creation":
