@@ -41,6 +41,36 @@ class AthleteManager:
 
         return athleteIDs
 
+    def addNewAthlete(self):
+        ID = input("\nInput a username: ")
+        name = input("Input your first name: ")
+        surname = input("Input your surname: ")
+        birthdate = input("Input your birthdate: ")
+        z = True
+        while z == True:
+            gender = input("Input your gender (male, female): ")
+            if gender != "male" and gender != "female":
+                print("Invalid input, please use either male or female")
+            else:
+                z = False
+
+        data= {"ID":{ID:{"name": name, "surname": surname, "birthdate": birthdate, "workout": {"week1": {}},
+                          "feedback": {}}}}
+        data["ID"][ID]["name"] = name
+        data["ID"][ID]["surname"] = surname
+        data["ID"][ID]["birthdate"] = birthdate
+        data["ID"][ID]["gender"] = gender
+        data["ID"][ID]["workout"]["week1"] = {"day1": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                              "day2": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                              "day3": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                              "day4": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                              "day5": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                              "day6": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                              "day7": {"morning": -1, "lunch": -1, "day": -1, "evening": -1}}
+        print("\nAthlete", ID, "(", name, surname, ") who is a", birthdate, "year old", gender, "has been created")
+        athlete = Athlete(ID, data["ID"][ID])
+        self.athletes.append(athlete)
+
 class Athlete:
 
     athlete_choices = ("creation", "check", "exit")
@@ -157,8 +187,6 @@ class Athlete:
                     self.feedback[self.count][self.week][self.day]["resolved"] = "no"
                     print("\nFeedback added for", time_answer, "during", self.day, "in", self.week)
 
-
-
 def main():
     athleteManager = AthleteManager()
     athleteManager.loadAthletesDataFromJSON()
@@ -186,9 +214,20 @@ def main():
                         else:
                             x = False
                 elif answer =="creation":
-                    #Athlete.createAthlete()
-                    #ToDo:implement later
-                    pass
+                    while True:
+                        answer = input(
+                            "\nAthlete Profile Creation | Choose an option for users? (create, delete, exit): ")
+                        if answer == "create":
+                            athleteManager.addNewAthlete()
+                            athleteManager.saveAthletesDataToJSON()
+                        elif answer == "delete":
+                            #athleteManager.deleteAthlete()
+                            #athleteManager.saveAthletesDataToJSON()
+                            break
+                        elif answer == "exit":
+                            break
+                        else:
+                            print("Invalid input, please try again")
                 elif answer =="exit":
                     y = False
                 else:
