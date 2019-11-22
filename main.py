@@ -71,6 +71,15 @@ class AthleteManager:
         athlete = Athlete(ID, data["ID"][ID])
         self.athletes.append(athlete)
 
+    def deleteAthlete(self,ID):
+        for athlete in self.athletes:
+            if athlete.ID == ID:
+                self.athletes.remove(athlete)
+                print(ID,"has been removed")
+                return None
+        print("The athlete does not exist")
+        return None
+
 class Athlete:
 
     athlete_choices = ("creation", "check", "exit")
@@ -221,9 +230,16 @@ def main():
                             athleteManager.addNewAthlete()
                             athleteManager.saveAthletesDataToJSON()
                         elif answer == "delete":
-                            #athleteManager.deleteAthlete()
-                            #athleteManager.saveAthletesDataToJSON()
-                            break
+                            ID = input(
+                                "\nList of Athletes | Choose a username to check info (" + (", ").join(
+                                    athleteManager.getAthleteIDs()) + ", or exit): ")
+                            if ID not in athleteManager.getAthleteIDs() and ID != "exit":
+                                print("Invalid input, try again")
+                            elif ID == "exit":
+                                break
+                            else:
+                                athleteManager.deleteAthlete(ID)
+                                athleteManager.saveAthletesDataToJSON()
                         elif answer == "exit":
                             break
                         else:
