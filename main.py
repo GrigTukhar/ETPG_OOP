@@ -1,9 +1,11 @@
 import json
 choices = ("athlete", "coach", "exit")
-
-#ToDo: move to Schedule Class
 days = ("day1", "day2", "day3", "day4", "day5", "day6", "day7")
 times = ("morning", "lunch", "day", "evening", "exit")
+replies_week = ("add", "remove", "exit")
+loads = ("easy", "medium", "hard")
+replies_workout = ("edit", "remove", "exit")
+sports = {"swimming", "cycling", "running"}
 
 class AthleteManager:
     def __init__(self):
@@ -30,6 +32,8 @@ class AthleteManager:
         for athlete in self.athletes:
             if athlete.ID == ID:
                 return athlete
+            elif ID == "exit":
+                return None
 
         print("The athlete does not exist")
         return None
@@ -83,6 +87,7 @@ class AthleteManager:
 class Athlete:
 
     athlete_choices = ("creation", "check", "exit")
+    coach_choices = ("week", "workout", "feedback", "exit")
 
     def __init__(self, ID, data):
         self.ID = ID
@@ -120,6 +125,18 @@ class Athlete:
                     self.createFeedback()
             elif answer == "no":
                 x = False
+            else:
+                print("Please try again")
+        return False
+
+    def editProfile(self):
+        x = True
+        while x == True:
+            answer = input("\nWould you like to edit this user (yes, no): ")
+            if answer == "yes":
+                return 1
+            elif answer == "no":
+                return 0
             else:
                 print("Please try again")
         return False
@@ -196,6 +213,181 @@ class Athlete:
                     self.feedback[self.count][self.week][self.day]["resolved"] = "no"
                     print("\nFeedback added for", time_answer, "during", self.day, "in", self.week)
 
+    def editWeek(self):
+        reply = "x"
+        print("\nCurrent weeks in schedule :(" + (", ").join(self.workout.keys()) + ")")
+        while (reply not in replies_week) or reply != "exit":
+            count = 1
+            for key in self.workout:
+                count = count + 1
+            reply = str(input("\nWhat would you like to do with the weeks (" + (", ").join(replies_week) + "): "))
+            if (reply not in replies_week):
+                print("Invalid input, try again")
+
+            if (reply == "add"):
+                count = str(count)
+                print("\nweek" + count, "has been added\n")
+                self.workout["week" + count] = {"day1": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                                   "day2": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                                   "day3": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                                   "day4": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                                   "day5": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                                   "day6": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                                   "day7": {"morning": -1, "lunch": -1, "day": -1, "evening": -1}}
+            if (reply == "remove"):
+                count = int(count) - 1
+                count = str(count)
+                print("\nweek" + count, "has been removed\n")
+                del self.workout["week" + count]
+
+    def editWorkout(self):
+        week = "x"
+        while week not in self.workout.keys():
+            week = input(str("\nInput week (" + (", ").join(self.workout.keys()) + "): "))
+            if week not in self.workout.keys():
+                print("That does not exist, try again")
+            else:
+                day = "x"
+                while day not in days:
+                    day = input(str("Input day (" + (", ").join(days) + "): "))
+                    if day not in days:
+                        print("That does not exist, try again")
+
+        week_schedule = self.workout[week][day]
+        print("\nCurrently looking at workouts on", day, "in", week, "\n")
+        for key in week_schedule:
+            if week_schedule[key] == -1:
+                print(key, ":", "no excerisize for this time of day")
+            else:
+                print(key, ":", week_schedule[key]["type"], "for", week_schedule[key]["minutes"], "minutes and",
+                      week_schedule[key]["distance"], "kilometers, at a", week_schedule[key]["load"], "load")
+        time = "x"
+        while (time not in times) or time != "exit":
+            time = input(str("\nInput time of day (" + (", ").join(times) + "): "))
+            if time not in times and time != "exit":
+                print("That does not exist, try again")
+            elif time == "exit":
+                continue
+            else:
+                if (week_schedule[time] == -1):
+                    print("No workout planned for", time)
+                reply = "x"
+                while (reply not in replies_workout):
+                    reply = str(
+                        input("\nChoose an option to perform on this workout (" + (", ").join(replies_workout) + "): "))
+                    if (reply not in replies_workout):
+                        print("Invalid input, try again")
+
+                    elif (reply == "remove"):
+                        if (week_schedule[time] == -1):
+                            print("\nThe time:", time, "is already empty")
+                        else:
+                            self.workout[week][day][time] = -1
+                            print("\nWorkout during", time, "on", day, "in", week, "has been removed")
+
+                    elif (reply == "edit"):
+                        sport = "x"
+                        load = "x"
+                        while (sport not in sports):
+                            sport = str(input("\nChoose sport type (" + (", ").join(sports) + "): "))
+                            if (sport not in sports):
+                                print("Invalid input, try again")
+
+                        isMinutesSet = False
+                        while (not isMinutesSet):
+                            minutes = input("Input amount of time in minutes from 0 to 240: ")
+                            try:
+                                minutes = float(minutes)
+                                if (minutes > 0 and minutes <= 240):
+                                    isMinutesSet = True
+                                else:
+                                    print(
+                                        "Wrong Input: Please type a positive integer number above 0 and below 240")
+                            except ValueError:
+                                print("Wrong Input: Please input a number")
+
+                        isDistanceSet = False
+                        while (not isDistanceSet):
+                            distance = input("Input the distance in kilometers from 0 to 200: ")
+                            try:
+                                distance = float(distance)
+                                if (distance > 0 and distance <= 200):
+                                    isDistanceSet = True
+                                else:
+                                    print(
+                                        "Wrong Input: Please type a positive integer number above 0 and below 200")
+                            except ValueError:
+                                print("Wrong Input: Please input a number")
+
+                        while (load not in loads):
+                            load = str(input("Choose load (" + (", ").join(loads) + "): "))
+                            if (load not in loads):
+                                print("Invalid input, try again")
+                        self.workout[week][day][time] = {"type": sport, "minutes": minutes,"distance": distance, "load": load}
+                        print("Workout created during", time, "on", day, "in", week, ":",self.workout[week][day][time]["type"], "for",self.workout[week][day][time]["minutes"], "minutes and",self.workout[week][day][time]["distance"], "kilometers, at a",self.workout[week][day][time]["load"], "load")
+
+    def checkFeedback(self):
+        numbers = []
+        print("\nFeedback Menu | Following data sent by athlete\n")
+        count = 1
+        for key in self.feedback:
+            week = list(self.feedback[key].keys())[0]
+            day = list(self.feedback[key][week].keys())[0]
+            time = list(self.feedback[key][week][day].keys())[0]
+            type = self.feedback[key][week][day][time]["type"]
+            minutes = self.feedback[key][week][day][time]["minutes"]
+            distance = self.feedback[key][week][day][time]["distance"]
+            load =self.feedback[key][week][day][time]["load"]
+            hasCompleted = self.feedback[key][week][day]["hasCompleted"]
+            feedback = self.feedback[key][week][day]["feedback"]
+            resolved = self.feedback[key][week][day]["resolved"]
+
+            if (resolved == "no"):
+                if hasCompleted == "no":
+                    print(count, ")", "In", week, "on", day, "during the", time,
+                          "the athlete did not perform the workout of", type, "for",
+                          minutes, "minutes and", distance, "kilometers on a", load, "load")
+                    print("    Feedback:", feedback)
+                    numbers.append(str(count))
+                else:
+                    print(count, ")", "In", week, "on", day, "during the", time, "the athlete performed the workout of",
+                          type, "for",
+                          minutes, "minutes and", distance, "kilometers on a", load, "load")
+                    print("    Feedback:", feedback)
+                    numbers.append(str(count))
+                count = count + 1
+            if (resolved == "yes"):
+                if hasCompleted == "no":
+                    print(count, ")", "RESOLVED | ", "In", week, "on", day, "during the", time,
+                          "the athlete did not perform the workout of", type, "for",
+                          minutes, "minutes and", distance, "kilometers on a", load, "load")
+                    print("    Feedback:", feedback)
+
+                else:
+                    print(count, ")", "RESOLVED | ", "In", week, "on", day, "during the", time,
+                          "the athlete performed the workout of", type, "for",
+                          minutes, "minutes and", distance, "kilometers on a", load, "load")
+                    print("    Feedback:", feedback)
+                count = count + 1
+        ask = "x"
+        while (ask != "yes" or ask != "no") and ask != "no" and len(numbers) != 0:
+            ask = str(input("\nWould you like to resolve a feedback (yes, no): "))
+            if (ask != "yes" and ask != "no"):
+                print("Invalid input, try again")
+            elif (ask == "yes"):
+                number = "x"
+                while (number not in numbers):
+                    number = str(input("\nChoose a workout (" + (", ").join(numbers) + "): "))
+                    if (number not in numbers):
+                        print("Invalid input, try again")
+                placeholder2 = list(self.feedback.keys())[int(number) - 1]
+                week = list(self.feedback[placeholder2].keys())[0]
+                day = list(self.feedback[placeholder2][week].keys())[0]
+                self.feedback[placeholder2][week][day]["resolved"] = "yes"
+                print("Workout in", week, "on", day, "during the", time, "of", type, "for",
+                      minutes, "minutes and", distance, "kilometers on a", load, "load, has been resolved")
+                numbers.remove(number)
+
 def main():
     athleteManager = AthleteManager()
     athleteManager.loadAthletesDataFromJSON()
@@ -215,11 +407,12 @@ def main():
                     while x == True:
                         ID = input(
                 "\nList of Athletes | Choose a username to check info (" + (", ").join(athleteManager.getAthleteIDs()) + ", or exit): ")
-                        athlete = athleteManager.getAthlete(ID)
-                        if athlete != None:
-                            athlete.printProfile()
-                            athlete.checkProfile()
-                            athleteManager.saveAthletesDataToJSON()
+                        if ID != "exit":
+                            athlete = athleteManager.getAthlete(ID)
+                            if athlete != None:
+                                athlete.printProfile()
+                                athlete.checkProfile()
+                                athleteManager.saveAthletesDataToJSON()
                         else:
                             x = False
                 elif answer =="creation":
@@ -250,7 +443,35 @@ def main():
                     print("Invalid input, please try again")
 
         elif (choice == "coach"):
-            pass
-            #ToDo:implement later
+            x = True
+            while x == True:
+                ID = input(
+                    "\nCoach Menu | Choose a username to edit (" + (", ").join(
+                        athleteManager.getAthleteIDs()) + ", or exit): ")
+                if ID != "exit":
+                    athlete = athleteManager.getAthlete(ID)
+                    if athlete != None:
+                        athlete.printProfile()
+                        edit_answer=  athlete.editProfile()
+                        if edit_answer == 1:
+                            y = True
+                            while y == True:
+                                answer = input("\nEdit Athlete Menu | Choose an option to edit (" + (", ").join(Athlete.coach_choices) + "): ")
+                                if answer == "week":
+                                   athlete.editWeek()
+                                   athleteManager.saveAthletesDataToJSON()
+                                elif answer == "workout":
+                                   athlete.editWorkout()
+                                   athleteManager.saveAthletesDataToJSON()
+                                elif answer == "feedback":
+                                   athlete.checkFeedback()
+                                   athleteManager.saveAthletesDataToJSON()
+                                elif answer == "exit":
+                                    y = False
+                                else:
+                                    print("Invalid input, try again")
+                else:
+                    x = False
+
 
 main()
