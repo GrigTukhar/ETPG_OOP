@@ -1,6 +1,5 @@
 import json
 
-
 class LinkedList:
 
     def __init__(self):
@@ -524,6 +523,5 @@ def main():
                                     print("Invalid input, try again")
                 else:
                     x = False
-
 
 main()
