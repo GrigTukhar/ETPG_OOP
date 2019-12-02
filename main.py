@@ -1,11 +1,5 @@
 import json
-choices = ("athlete", "coach", "exit")
-days = ("day1", "day2", "day3", "day4", "day5", "day6", "day7")
-times = ("morning", "lunch", "day", "evening", "exit")
-replies_week = ("add", "remove", "exit")
-loads = ("easy", "medium", "hard")
-replies_workout = ("edit", "remove", "exit")
-sports = {"swimming", "cycling", "running"}
+
 
 class LinkedList:
 
@@ -133,6 +127,13 @@ class AthleteManager:
 
 class Athlete:
 
+    choices = ("athlete", "coach", "exit")
+    days = ("day1", "day2", "day3", "day4", "day5", "day6", "day7")
+    times = ("morning", "lunch", "day", "evening", "exit")
+    replies_week = ("add", "remove", "exit")
+    loads = ("easy", "medium", "hard")
+    replies_workout = ("edit", "remove", "exit")
+    sports = {"swimming", "cycling", "running"}
     athlete_choices = ("creation", "check", "exit")
     coach_choices = ("week", "workout", "feedback", "exit")
 
@@ -200,10 +201,10 @@ class Athlete:
                 print("That does not exist, try again")
             else:
                 day = "x"
-                while day not in days:
-                    day = input(str("Input day (" + (", ").join(days) + "): "))
+                while day not in Athlete.days:
+                    day = input(str("Input day (" + (", ").join(Athlete.days) + "): "))
                     print("")
-                    if day not in days:
+                    if day not in Athlete.days:
                         print("That does not exist, try again")
                     else:
                         count = 0
@@ -235,11 +236,11 @@ class Athlete:
 
     def createFeedback(self):
         time_answer = "x"
-        while time_answer not in times or time_answer != exit:
+        while time_answer not in Athlete.times or time_answer != exit:
             time_answer = input(
                 "\nChoose one of the following options for " + self.day + " in " + self.week + " (" + (", ").join(
-                    times) + "): ")
-            if time_answer not in times:
+                    Athlete.times) + "): ")
+            if time_answer not in Athlete.times:
                 print("That does not exist, try again")
             elif time_answer == "exit":
                 return 0
@@ -267,12 +268,12 @@ class Athlete:
     def editWeek(self):
         reply = "x"
         print("\nCurrent weeks in schedule :(" + (", ").join(self.workout.keys()) + ")")
-        while (reply not in replies_week) or reply != "exit":
+        while (reply not in Athlete.replies_week) or reply != "exit":
             count = 1
             for key in self.workout:
                 count = count + 1
-            reply = str(input("\nWhat would you like to do with the weeks (" + (", ").join(replies_week) + "): "))
-            if (reply not in replies_week):
+            reply = str(input("\nWhat would you like to do with the weeks (" + (", ").join(Athlete.replies_week) + "): "))
+            if (reply not in Athlete.replies_week):
                 print("Invalid input, try again")
 
             if (reply == "add"):
@@ -299,9 +300,9 @@ class Athlete:
                 print("That does not exist, try again")
             else:
                 day = "x"
-                while day not in days:
-                    day = input(str("Input day (" + (", ").join(days) + "): "))
-                    if day not in days:
+                while day not in Athlete.days:
+                    day = input(str("Input day (" + (", ").join(Athlete.days) + "): "))
+                    if day not in Athlete.days:
                         print("That does not exist, try again")
 
         week_schedule = self.workout[week][day]
@@ -313,9 +314,9 @@ class Athlete:
                 print(key, ":", week_schedule[key]["type"], "for", week_schedule[key]["minutes"], "minutes and",
                       week_schedule[key]["distance"], "kilometers, at a", week_schedule[key]["load"], "load")
         time = "x"
-        while (time not in times) or time != "exit":
-            time = input(str("\nInput time of day (" + (", ").join(times) + "): "))
-            if time not in times and time != "exit":
+        while (time not in Athlete.times) or time != "exit":
+            time = input(str("\nInput time of day (" + (", ").join(Athlete.times) + "): "))
+            if time not in Athlete.times and time != "exit":
                 print("That does not exist, try again")
             elif time == "exit":
                 continue
@@ -323,10 +324,10 @@ class Athlete:
                 if (week_schedule[time] == -1):
                     print("No workout planned for", time)
                 reply = "x"
-                while (reply not in replies_workout):
+                while (reply not in Athlete.replies_workout):
                     reply = str(
-                        input("\nChoose an option to perform on this workout (" + (", ").join(replies_workout) + "): "))
-                    if (reply not in replies_workout):
+                        input("\nChoose an option to perform on this workout (" + (", ").join(Athlete.replies_workout) + "): "))
+                    if (reply not in Athlete.replies_workout):
                         print("Invalid input, try again")
 
                     elif (reply == "remove"):
@@ -339,9 +340,9 @@ class Athlete:
                     elif (reply == "edit"):
                         sport = "x"
                         load = "x"
-                        while (sport not in sports):
-                            sport = str(input("\nChoose sport type (" + (", ").join(sports) + "): "))
-                            if (sport not in sports):
+                        while (sport not in Athlete.sports):
+                            sport = str(input("\nChoose sport type (" + (", ").join(Athlete.sports) + "): "))
+                            if (sport not in Athlete.sports):
                                 print("Invalid input, try again")
 
                         isMinutesSet = False
@@ -370,9 +371,9 @@ class Athlete:
                             except ValueError:
                                 print("Wrong Input: Please input a number")
 
-                        while (load not in loads):
-                            load = str(input("Choose load (" + (", ").join(loads) + "): "))
-                            if (load not in loads):
+                        while (load not in Athlete.loads):
+                            load = str(input("Choose load (" + (", ").join(Athlete.loads) + "): "))
+                            if (load not in Athlete.loads):
                                 print("Invalid input, try again")
                         self.workout[week][day][time] = {"type": sport, "minutes": minutes,"distance": distance, "load": load}
                         print("Workout created during", time, "on", day, "in", week, ":",self.workout[week][day][time]["type"], "for",self.workout[week][day][time]["minutes"], "minutes and",self.workout[week][day][time]["distance"], "kilometers, at a",self.workout[week][day][time]["load"], "load")
@@ -445,9 +446,9 @@ def main():
 
     choice = "x"
     print("\nETPG® | The training schedule program for any endurance trainer and athletes")
-    while (choice not in choices) or choice != "exit":
-        choice = str(input("\nGeneral Menu | Choose any of the following options (" + (", ").join(choices) + "): "))
-        if (choice not in choices):
+    while (choice not in Athlete.choices) or choice != "exit":
+        choice = str(input("\nGeneral Menu | Choose any of the following options (" + (", ").join(Athlete.choices) + "): "))
+        if (choice not in Athlete.choices):
             print("Invalid input, try again")
         elif (choice == "athlete"):
             y=True
