@@ -65,7 +65,6 @@ class AthleteManager:
     def __init__(self):
         self.athletes = LinkedList()
 
-
     def loadAthletesDataFromJSON(self):
         with open("main.json") as data_file:
             data = json.load(data_file)["ID"]
