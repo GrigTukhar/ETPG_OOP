@@ -7,42 +7,90 @@ loads = ("easy", "medium", "hard")
 replies_workout = ("edit", "remove", "exit")
 sports = {"swimming", "cycling", "running"}
 
+class LinkedList:
+
+    def __init__(self):
+        self.head= None
+
+    def addAsLast(self,node):
+        if self.head ==None:
+            self.head = node
+        else:
+            tmp =self.head
+            while(tmp.next != None):
+                tmp = tmp.next
+
+            tmp.next = node
+
+    def find(self,ID):
+        tmp = self.head
+        while (tmp!=None):
+            if tmp.isEqual(ID):
+                return tmp
+            tmp = tmp.next
+        return None
+
+    def convertToJson(self):
+        json_all = {}
+        json_all["ID"] = {}
+        tmp = self.head
+        while (tmp != None):
+            json_all["ID"][tmp.ID] = tmp.getJSON()
+            tmp = tmp.next
+        return json_all
+
+    def saveIDs(self):
+        athleteIDs = []
+        tmp = self.head
+        while (tmp != None):
+            athleteIDs.append(tmp.ID)
+            tmp = tmp.next
+        return athleteIDs
+
+    def removeUser(self, ID):
+            previous_node = None
+            current_node = self.head
+            while current_node:
+                if current_node.ID == ID:
+                    if previous_node:
+                        previous_node.next = current_node.next
+                    else:
+                        self.head = current_node.next
+                    return True
+                previous_node = current_node
+                current_node = current_node.next
+            return False
+
 class AthleteManager:
     def __init__(self):
-        self.athletes = []
+        self.athletes = LinkedList()
+
 
     def loadAthletesDataFromJSON(self):
         with open("main.json") as data_file:
             data = json.load(data_file)["ID"]
             for key in data:
                 athlete = Athlete(key, data[key])
-                self.athletes.append(athlete)
+                self.athletes.addAsLast(athlete)
 
     def saveAthletesDataToJSON(self):
-        json_all = {}
-        json_all["ID"] = {}
-        for athlete in self.athletes:
-            json_all["ID"][athlete.ID] = athlete.getJSON()
-
+        json_all = self.athletes.convertToJson()
         file = open("main.json", "w")
         file.write(json.dumps(json_all))
         file.close()
 
     def getAthlete(self, ID):
-        for athlete in self.athletes:
-            if athlete.ID == ID:
-                return athlete
-            elif ID == "exit":
-                return None
+        athlete = self.athletes.find(ID)
+        if athlete.ID == ID:
+            return athlete
+        elif ID == "exit":
+            return None
 
         print("The athlete does not exist")
         return None
 
     def getAthleteIDs(self):
-        athleteIDs = []
-        for athlete in self.athletes:
-            athleteIDs.append(athlete.ID)
-
+        athleteIDs=self.athletes.saveIDs()
         return athleteIDs
 
     def addNewAthlete(self):
@@ -73,16 +121,16 @@ class AthleteManager:
                                               "day7": {"morning": -1, "lunch": -1, "day": -1, "evening": -1}}
         print("\nAthlete", ID, "(", name, surname, ") who is a", birthdate, "year old", gender, "has been created")
         athlete = Athlete(ID, data["ID"][ID])
-        self.athletes.append(athlete)
+        self.athletes.addAsLast(athlete)
 
     def deleteAthlete(self,ID):
-        for athlete in self.athletes:
-            if athlete.ID == ID:
-                self.athletes.remove(athlete)
-                print(ID,"has been removed")
-                return None
-        print("The athlete does not exist")
-        return None
+        found = self.athletes.removeUser(ID)
+        if found:
+            print(ID,"has been removed")
+            return None
+        else:
+            print("The athlete does not exist")
+            return None
 
 class Athlete:
 
@@ -100,6 +148,10 @@ class Athlete:
         self.count = 0
         for key in self.feedback:
             self.count +=1
+        self.next = None
+
+    def isEqual(self, ID):
+        return self.ID == ID
 
     def getJSON(self):
         json = {}
