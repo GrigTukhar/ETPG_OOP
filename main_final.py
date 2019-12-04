@@ -127,6 +127,18 @@ class BST():
             self.json_all["ID"][root.ID] = root.getJSON()
             self._convertToJson(root.right_child)
 
+    def saveIDs(self):
+        self.athleteIDs = []
+        tmp = self.root
+        self._saveIDs(tmp)
+        return self.athleteIDs
+
+    def _saveIDs(self,root):
+        if root !=None:
+            self._saveIDs(root.left_child)
+            self.athleteIDs.append(root.ID)
+            self._saveIDs(root.right_child)
+
 class AthleteManager:
     def __init__(self):
         self.athletes = LinkedList()
@@ -141,10 +153,10 @@ class AthleteManager:
                 self.BST_athletes.addNode(athlete)
 
     def saveAthletesDataToJSON(self):
-        json_all = self.athletes.convertToJson()
-        file = open("main.json", "w")
-        file.write(json.dumps(json_all))
-        file.close()
+        # json_all = self.athletes.convertToJson()
+        # file = open("main.json", "w")
+        # file.write(json.dumps(json_all))
+        # file.close()
         BST_json_all = self.BST_athletes.convertToJson()
         file_BST = open("main_BST.json", "w")
         file_BST.write(json.dumps(BST_json_all))
@@ -160,8 +172,22 @@ class AthleteManager:
         print("The athlete does not exist")
         return None
 
+    def getBSTAthlete(self, ID):
+        athlete = self.BST_athletes.find(ID)
+        if athlete.ID == ID:
+            return athlete
+        elif ID == "exit":
+            return None
+
+        print("The athlete does not exist")
+        return None
+
     def getAthleteIDs(self):
         athleteIDs=self.athletes.saveIDs()
+        return athleteIDs
+
+    def getBSTAthleteIDs(self):
+        athleteIDs=self.BST_athletes.saveIDs()
         return athleteIDs
 
     def addNewAthlete(self):
@@ -193,6 +219,36 @@ class AthleteManager:
         print("\nAthlete", ID, "(", name, surname, ") who is a", birthdate, "year old", gender, "has been created")
         athlete = Athlete(ID, data["ID"][ID])
         self.athletes.addAsLast(athlete)
+
+    def addNewBSTAthlete(self):
+        ID = input("\nInput a username: ")
+        name = input("Input your first name: ")
+        surname = input("Input your surname: ")
+        birthdate = input("Input your birthdate: ")
+        z = True
+        while z == True:
+            gender = input("Input your gender (male, female): ")
+            if gender != "male" and gender != "female":
+                print("Invalid input, please use either male or female")
+            else:
+                z = False
+
+        data= {"ID":{ID:{"name": name, "surname": surname, "birthdate": birthdate, "workout": {"week1": {}},
+                          "feedback": {}}}}
+        data["ID"][ID]["name"] = name
+        data["ID"][ID]["surname"] = surname
+        data["ID"][ID]["birthdate"] = birthdate
+        data["ID"][ID]["gender"] = gender
+        data["ID"][ID]["workout"]["week1"] = {"day1": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                              "day2": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                              "day3": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                              "day4": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                              "day5": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                              "day6": {"morning": -1, "lunch": -1, "day": -1, "evening": -1},
+                                              "day7": {"morning": -1, "lunch": -1, "day": -1, "evening": -1}}
+        print("\nAthlete", ID, "(", name, surname, ") who is a", birthdate, "year old", gender, "has been created")
+        athlete = Athlete(ID, data["ID"][ID])
+        self.BST_athletes.addNode(athlete)
 
     def deleteAthlete(self,ID):
         found = self.athletes.removeUser(ID)
@@ -538,12 +594,15 @@ def main():
                     x = True
                     while x == True:
                         ID = input(
-                "\nList of Athletes | Choose a username to check info (" + (", ").join(athleteManager.getAthleteIDs()) + ", or exit): ")
+                "\nList of Athletes | Choose a username to check info (" + (", ").join(athleteManager.getAthleteIDs()) +", or exit) (BST: "+ (", ").join(athleteManager.getBSTAthleteIDs()) + ", or exit): ")
                         if ID != "exit":
                             athlete = athleteManager.getAthlete(ID)
-                            if athlete != None:
-                                athlete.printProfile()
-                                athlete.checkProfile()
+                            bst_athlete = athleteManager.getBSTAthlete(ID)
+                            if athlete != None and bst_athlete!= None:
+                                #athlete.printProfile()
+                                #athlete.checkProfile()
+                                bst_athlete.printProfile()
+                                bst_athlete.checkProfile()
                                 athleteManager.saveAthletesDataToJSON()
                         else:
                             x = False
@@ -552,13 +611,14 @@ def main():
                         answer = input(
                             "\nAthlete Profile Creation | Choose an option for users? (create, delete, exit): ")
                         if answer == "create":
-                            athleteManager.addNewAthlete()
+                            #athleteManager.addNewAthlete()
+                            athleteManager.addNewBSTAthlete()
                             athleteManager.saveAthletesDataToJSON()
                         elif answer == "delete":
                             ID = input(
                                 "\nList of Athletes | Choose a username to check info (" + (", ").join(
-                                    athleteManager.getAthleteIDs()) + ", or exit): ")
-                            if ID not in athleteManager.getAthleteIDs() and ID != "exit":
+                                    athleteManager.getAthleteIDs())+", or exit) (BST: "+ (", ").join(athleteManager.getBSTAthleteIDs())  + ", or exit): ")
+                            if ID not in athleteManager.getAthleteIDs() and athleteManager.getBSTAthleteIDs() and ID != "exit":
                                 print("Invalid input, try again")
                             elif ID == "exit":
                                 break
@@ -579,25 +639,46 @@ def main():
             while x == True:
                 ID = input(
                     "\nCoach Menu | Choose a username to edit (" + (", ").join(
-                        athleteManager.getAthleteIDs()) + ", or exit): ")
+                        athleteManager.getAthleteIDs())+", or exit) (BST: "+ (", ").join(athleteManager.getBSTAthleteIDs())  + ", or exit): ")
                 if ID != "exit":
                     athlete = athleteManager.getAthlete(ID)
-                    if athlete != None:
-                        athlete.printProfile()
-                        edit_answer=  athlete.editProfile()
+                    bst_athlete = athleteManager.getBSTAthlete(ID)
+                    if athlete != None and bst_athlete != None:
+                        # athlete.printProfile()
+                        # edit_answer=  athlete.editProfile()
+                        # if edit_answer == 1:
+                        #     y = True
+                        #     while y == True:
+                        #         answer = input("\nEdit Athlete Menu | Choose an option to edit (" + (", ").join(Athlete.coach_choices) + "): ")
+                        #         if answer == "week":
+                        #            athlete.editWeek()
+                        #            athleteManager.saveAthletesDataToJSON()
+                        #         elif answer == "workout":
+                        #            athlete.editWorkout()
+                        #            athleteManager.saveAthletesDataToJSON()
+                        #         elif answer == "feedback":
+                        #            athlete.checkFeedback()
+                        #            athleteManager.saveAthletesDataToJSON()
+                        #         elif answer == "exit":
+                        #             y = False
+                        #         else:
+                        #             print("Invalid input, try again")
+                        bst_athlete.printProfile()
+                        edit_answer = bst_athlete.editProfile()
                         if edit_answer == 1:
                             y = True
                             while y == True:
-                                answer = input("\nEdit Athlete Menu | Choose an option to edit (" + (", ").join(Athlete.coach_choices) + "): ")
+                                answer = input("\nEdit Athlete Menu | Choose an option to edit (" + (", ").join(
+                                    Athlete.coach_choices) + "): ")
                                 if answer == "week":
-                                   athlete.editWeek()
-                                   athleteManager.saveAthletesDataToJSON()
+                                    bst_athlete.editWeek()
+                                    athleteManager.saveAthletesDataToJSON()
                                 elif answer == "workout":
-                                   athlete.editWorkout()
-                                   athleteManager.saveAthletesDataToJSON()
+                                    bst_athlete.editWorkout()
+                                    athleteManager.saveAthletesDataToJSON()
                                 elif answer == "feedback":
-                                   athlete.checkFeedback()
-                                   athleteManager.saveAthletesDataToJSON()
+                                    bst_athlete.checkFeedback()
+                                    athleteManager.saveAthletesDataToJSON()
                                 elif answer == "exit":
                                     y = False
                                 else:
