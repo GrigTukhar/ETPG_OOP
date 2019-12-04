@@ -54,9 +54,83 @@ class LinkedList:
                 current_node = current_node.next
             return False
 
+class BST():
+
+    def __init__(self):
+        self.root = None
+        self.capacity = 20
+
+    def hash(self,ID):
+        hashsum = 0
+        for idx, c in enumerate(ID):
+            hashsum += (idx+len(ID))**ord(c)
+            hashsum = hashsum % self.capacity
+        return hashsum
+
+    def addNode(self, node):
+        if self.root == None:
+            self.root = node
+        else:
+            root_hash = hash(self.root.ID)
+            node_hash = hash(node.ID)
+            if root_hash == node_hash:
+                print("Node already exists")
+            else:
+                self.addToRoot(node, self.root)
+
+    def addToRoot(self, node, root):
+        root_hash = hash(root.ID)
+        node_hash = hash(node.ID)
+        if node_hash < root_hash:
+            if root.left_child == None:
+                root.left_child = node
+            else:
+                self.addToRoot(node, root.left_child)
+        else:
+            if root.right_child == None:
+                root.right_child = node
+            else:
+                self.addToRoot(node, root.right_child)
+
+    def find(self, ID):
+        if self.root != None:
+            found = self._find(ID, self.root)
+            if found != 1:
+                return found
+            else:
+                return 1
+        else:
+            return None
+
+    def _find(self, value, root):
+        value_hash = hash(value)
+        root_hash = hash(root.ID)
+        if value_hash == root_hash:
+            return root
+        elif root.left_child != None:
+            return self._find(value, root.left_child)
+        elif root.right_child != None:
+            return self._find(value, root.right_child)
+        else:
+            return 1
+
+    def convertToJson(self):
+        self.json_all = {}
+        self.json_all["ID"] = {}
+        tmp = self.root
+        self._convertToJson(tmp)
+        return self.json_all
+
+    def _convertToJson(self,root):
+        if root !=None:
+            self._convertToJson(root.left_child)
+            self.json_all["ID"][root.ID] = root.getJSON()
+            self._convertToJson(root.right_child)
+
 class AthleteManager:
     def __init__(self):
         self.athletes = LinkedList()
+        self.BST_athletes = BST()
 
     def loadAthletesDataFromJSON(self):
         with open("main.json") as data_file:
@@ -64,12 +138,17 @@ class AthleteManager:
             for key in data:
                 athlete = Athlete(key, data[key])
                 self.athletes.addAsLast(athlete)
+                self.BST_athletes.addNode(athlete)
 
     def saveAthletesDataToJSON(self):
         json_all = self.athletes.convertToJson()
         file = open("main.json", "w")
         file.write(json.dumps(json_all))
         file.close()
+        BST_json_all = self.BST_athletes.convertToJson()
+        file_BST = open("main_BST.json", "w")
+        file_BST.write(json.dumps(BST_json_all))
+        file_BST.close()
 
     def getAthlete(self, ID):
         athlete = self.athletes.find(ID)
@@ -148,6 +227,8 @@ class Athlete:
         for key in self.feedback:
             self.count +=1
         self.next = None
+        self.left_child = None
+        self.right_child = None
 
     def isEqual(self, ID):
         return self.ID == ID
