@@ -84,11 +84,13 @@ class BST():
         if node_hash < root_hash:
             if root.left_child == None:
                 root.left_child = node
+                root.left_child.parent = root
             else:
                 self.addToRoot(node, root.left_child)
         else:
             if root.right_child == None:
                 root.right_child = node
+                root.right_child.parent = root
             else:
                 self.addToRoot(node, root.right_child)
 
@@ -139,18 +141,76 @@ class BST():
             self.athleteIDs.append(root.ID)
             self._saveIDs(root.right_child)
 
+    def delete(self, ID):
+        if self.find(ID)!= 1:
+            return self._delete(self.find(ID))
+        else:
+            print("User not found")
+
+    def _delete(self, node):
+        if node == None or self.find(node.ID) == None:
+            return None
+
+        def min_value_node(n):
+            current = n
+            while current.left_child != None:
+                current = current.left_child
+            return current
+
+        def num_children(n):
+            num_children = 0
+            if n.left_child != None: num_children += 1
+            if n.right_child != None: num_children += 1
+            return num_children
+
+        node_parent = node.parent
+        node_children = num_children(node)
+        if node_children == 0:
+            if node_parent != None:
+                if node_parent.left_child == node:
+                    node_parent.left_child = None
+                else:
+                    node_parent.right_child = None
+            else:
+                self.root = None
+
+        if node_children == 1:
+            if node.left_child != None:
+                child = node.left_child
+            else:
+                child = node.right_child
+            if node_parent != None:
+                if node_parent.left_child == node:
+                    node_parent.left_child = child
+                else:
+                    node_parent.right_child = child
+            else:
+                self.root = child
+            child.parent = node_parent
+
+        if node_children == 2:
+            successor = min_value_node(node.right_child)
+            node.value = successor.value
+            self._delete(successor)
+
+        print(node.ID, "has been deleted")
+
 class AthleteManager:
     def __init__(self):
         self.athletes = LinkedList()
         self.BST_athletes = BST()
 
     def loadAthletesDataFromJSON(self):
-        with open("main.json") as data_file:
-            data = json.load(data_file)["ID"]
-            for key in data:
-                athlete = Athlete(key, data[key])
-                self.athletes.addAsLast(athlete)
-                self.BST_athletes.addNode(athlete)
+        # with open("main.json") as data_file:
+        #     data = json.load(data_file)["ID"]
+        #     for key in data:
+        #         athlete = Athlete(key, data[key])
+        #         self.athletes.addAsLast(athlete)
+        with open("main_BST.json") as dataBST_file:
+            dataBST = json.load(dataBST_file)["ID"]
+            for key in dataBST:
+                BSTathlete = Athlete(key, dataBST[key])
+                self.BST_athletes.addNode(BSTathlete)
 
     def saveAthletesDataToJSON(self):
         # json_all = self.athletes.convertToJson()
@@ -259,6 +319,10 @@ class AthleteManager:
             print("The athlete does not exist")
             return None
 
+    def deleteBSTAthlete(self,ID):
+        self.BST_athletes.delete(ID)
+
+
 class Athlete:
 
     choices = ("athlete", "coach", "exit")
@@ -285,6 +349,7 @@ class Athlete:
         self.next = None
         self.left_child = None
         self.right_child = None
+        self.parent = None
 
     def isEqual(self, ID):
         return self.ID == ID
@@ -593,8 +658,12 @@ def main():
                 if answer =="check":
                     x = True
                     while x == True:
+                #         ID = input(
+                # "\nList of Athletes | Choose a username to check info (" + (", ").join(athleteManager.getAthleteIDs()) +", or exit): ")
                         ID = input(
-                "\nList of Athletes | Choose a username to check info (" + (", ").join(athleteManager.getAthleteIDs()) +", or exit) (BST: "+ (", ").join(athleteManager.getBSTAthleteIDs()) + ", or exit): ")
+                            "\nList of Athletes | Choose a username to check info (BST: " + (", ").join(
+                                athleteManager.getBSTAthleteIDs()) + ", or exit): ")
+
                         if ID != "exit":
                             athlete = athleteManager.getAthlete(ID)
                             bst_athlete = athleteManager.getBSTAthlete(ID)
@@ -615,15 +684,21 @@ def main():
                             athleteManager.addNewBSTAthlete()
                             athleteManager.saveAthletesDataToJSON()
                         elif answer == "delete":
+                            # ID = input(
+                            #     "\nList of Athletes | Choose a username to check info (" + (", ").join(
+                            #         athleteManager.getAthleteIDs())+", or exit): ")
                             ID = input(
-                                "\nList of Athletes | Choose a username to check info (" + (", ").join(
-                                    athleteManager.getAthleteIDs())+", or exit) (BST: "+ (", ").join(athleteManager.getBSTAthleteIDs())  + ", or exit): ")
-                            if ID not in athleteManager.getAthleteIDs() and athleteManager.getBSTAthleteIDs() and ID != "exit":
+                                "\nList of Athletes | Choose a username to check info (BST: " + (", ").join(
+                                    athleteManager.getBSTAthleteIDs()) + ", or exit): ")
+                            # if ID not in athleteManager.getAthleteIDs()and ID != "exit":
+                            #     print("Invalid input, try again")
+                            if ID not in athleteManager.getBSTAthleteIDs() and ID != "exit":
                                 print("Invalid input, try again")
                             elif ID == "exit":
                                 break
                             else:
-                                athleteManager.deleteAthlete(ID)
+                                #athleteManager.deleteAthlete(ID)
+                                athleteManager.deleteBSTAthlete(ID)
                                 athleteManager.saveAthletesDataToJSON()
                         elif answer == "exit":
                             break
@@ -637,13 +712,16 @@ def main():
         elif (choice == "coach"):
             x = True
             while x == True:
+                # ID = input(
+                #     "\nCoach Menu | Choose a username to edit (" + (", ").join(
+                #         athleteManager.getAthleteIDs())+", or exit): ")
                 ID = input(
-                    "\nCoach Menu | Choose a username to edit (" + (", ").join(
-                        athleteManager.getAthleteIDs())+", or exit) (BST: "+ (", ").join(athleteManager.getBSTAthleteIDs())  + ", or exit): ")
+                    "\nCoach Menu | Choose a username to edit (BST: " + (", ").join(
+                        athleteManager.getBSTAthleteIDs()) + ", or exit): ")
                 if ID != "exit":
-                    athlete = athleteManager.getAthlete(ID)
+                    #athlete = athleteManager.getAthlete(ID)
                     bst_athlete = athleteManager.getBSTAthlete(ID)
-                    if athlete != None and bst_athlete != None:
+                    #if athlete != None
                         # athlete.printProfile()
                         # edit_answer=  athlete.editProfile()
                         # if edit_answer == 1:
@@ -663,6 +741,7 @@ def main():
                         #             y = False
                         #         else:
                         #             print("Invalid input, try again")
+                    if bst_athlete != None:
                         bst_athlete.printProfile()
                         edit_answer = bst_athlete.editProfile()
                         if edit_answer == 1:
